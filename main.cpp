@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <windowsx.h>
 #include "main.h"
+
 LRESULT CALLBACK WindowProc(HWND hWnd,
     UINT message,
     WPARAM wParam,
@@ -53,6 +54,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
     }
     return msg.wParam;
 }
+void RenderFrame(void)
+{
+    float clear_color[] = { 0.0, 0.0, 0.5, 1.0 };
+    devcon->ClearRenderTargetView(backbuffer, clear_color);
+    swapchain->Present(0, 0);
+}
 void InitD3D(HWND hWnd)
 {
     DXGI_SWAP_CHAIN_DESC scd;
@@ -75,11 +82,27 @@ void InitD3D(HWND hWnd)
         &dev,
         NULL,
         &devcon);
+    ID3D11Texture2D* pBackBuffer;
+    swapchain->GetBuffer(0u, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+    dev->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
+    pBackBuffer->Release();
+    devcon->OMSetRenderTargets(1, &backbuffer, NULL);
+    RenderFrame();
+    D3D11_VIEWPORT viewport;
+    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.Width = 35;
+    viewport.Height = 35;
+
+    devcon->RSSetViewports(1, &viewport);
 }
 void CleanD3D()
 {
     swapchain->Release();
     dev->Release();
+    backbuffer->Release();
     devcon->Release();
 }
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
