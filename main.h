@@ -6,6 +6,7 @@
 IDXGISwapChain* swapchain;
 ID3D11Device* dev;
 ID3D11DeviceContext* devcon;
+ID3D11RenderTargetView* backbuffer;
 
 void InitD3D(HWND hWnd);
 void CleanD3D(void);
